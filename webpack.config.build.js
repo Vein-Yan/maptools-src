@@ -9,7 +9,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
      new UglifyJSPlugin()
    ],
    output: {
-    filename: '[name].bundle.js',
+    filename: './assets/[name].bundle.js',
     publicPath: "/assets/",
     path: path.resolve(__dirname, 'build')
   },
