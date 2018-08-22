@@ -6,6 +6,9 @@ import App from './App.vue';
 import Home from './components/Home.vue';
 import SpatialFilter from './components/SpatialFilter.vue';
 import Buffer from './components/Buffer.vue';
+import Transform from './components/Transform.vue';
+import Elevation from './components/Elevation.vue';
+import DrawGraphics from './components/DrawGraphics.vue';
 import DataVisualization from './components/DataVisualization.vue';
 
 Vue.use(VueRouter)
@@ -14,7 +17,10 @@ Vue.use(ElementUI);
 const routes = [
   { path: '/', component: Home },
   { path: '/spatialFilter', component: SpatialFilter },
+  { path: '/transform', component: Transform },
   { path: '/buffer', component: Buffer },
+  { path: '/elevation', component: Elevation },
+  { path: '/draw', component: DrawGraphics },
   { path: '/dataVisualization', component: DataVisualization }
 ];
 
