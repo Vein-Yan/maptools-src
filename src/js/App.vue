@@ -6,13 +6,11 @@
     </el-main>
   </el-container>
 </template>
-
 <script>
 {
   data: null
 }
 </script>
-
 <style>
 .el-header,
 .el-footer {
