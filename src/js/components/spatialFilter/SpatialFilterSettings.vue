@@ -26,7 +26,7 @@
       </el-form>
     </section>
     <section class="v-settings" v-else-if="filterType === 'customize'">
-      <el-upload class="upload-demo" drag :multiple="false" accept="text/json" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onChange>
+      <el-upload class="upload-demo" drag :multiple="false" accept="application/json" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onChange>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
