@@ -1,14 +1,26 @@
 <template>
   <el-container>
     <el-header>在线地理信息处理小工具</el-header>
-    <el-main>
-      <router-view></router-view>
+    <el-main  ref="main">
+      <router-view :mainScrollTop="scrollTop"> </router-view>
     </el-main>
   </el-container>
 </template>
 <script>
-{
-  data: null
+export default {
+  data(){
+    return {
+      scrollTop: 0
+    }
+  },
+  mounted() {
+    this.$refs.main.$el.addEventListener('scroll', this.handleScroll)
+  },
+  methods: {
+    handleScroll(evt){
+      this.scrollTop = evt.target.scrollTop;
+    }
+  }
 }
 </script>
 <style>
