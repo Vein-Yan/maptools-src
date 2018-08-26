@@ -3,8 +3,10 @@ const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
-  plugins: [new webpack.HotModuleReplacementPlugin(), //热加载插件,
-    new VueLoaderPlugin()],
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(), //热加载插件,
+    new VueLoaderPlugin()
+  ],
   entry: {
     index: './src/js/index.js'
   },
@@ -45,5 +47,14 @@ module.exports = {
         use: ['vue-loader']
       }
     ]
+  },
+  resolve: {
+    // 自动补全的扩展名
+    extensions: ['.js', '.vue', '.json'],
+    // 默认路径代理
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@data': path.resolve(__dirname, 'data')
+    }
   }
 }

@@ -5,28 +5,14 @@
       <el-radio label="city">按城市</el-radio>
       <el-radio label="customize">自定义</el-radio>
     </el-radio-group>
-    <section class="v-settings" v-if="filterType === 'province'">
-      <el-form>
-        <el-form-item label="选择省份" label-width='120px'>
-          <el-select v-model="selectedProvinces" filterable multiple placeholder="请选择">
-            <el-option v-for="item in allProvinces" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
+    <section class="v-settings" :class="{hide: filterType !== 'province'}">
+      <spatial-filter-form :lonColumns="lonColumns" :selectedLon="selectedLontitude" :latColumns="latColumns" :selectedLat="selectedLattitude" :allData="allProvinces" type="省份" @onSettingChange=handleProvinceSettingChange></spatial-filter-form>
     </section>
-    <section class="v-settings" v-else-if="filterType === 'city'">
-      <el-form>
-        <el-form-item label="选择城市" label-width='120px'>
-          <el-select v-model="selectedCities" filterable multiple placeholder="请选择">
-            <el-option v-for="item in allCities" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
+    <section class="v-settings" :class="{hide: filterType !== 'city'}">
+      <spatial-filter-form :lonColumns="lonColumns" :selectedLon="selectedLontitude" :latColumns="latColumns" :selectedLat="selectedLattitude" :allData="allCities" type="城市" @onSettingChange=handleCitySettingChange></spatial-filter-form>
     </section>
-    <section class="v-settings" v-else-if="filterType === 'customize'">
-      <el-upload class="upload-demo" drag :multiple="false" accept="application/json" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onChange>
+    <section class="v-settings" :class="{hide: filterType !== 'customize'}">
+      <el-upload class="upload-demo" drag :multiple="false" accept="application/json" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
@@ -38,12 +24,16 @@
 </template>
 
 <script>
+import SpatialFilterForm from './SpatialFilterForm.vue'
+import Provinces from '@data/geojson/china.json'
 const FILTER_TYPE = {
   PROVINCE: 'province',
   CITY: 'city',
   CUSTOMIZE: 'customize'
 }
 export default {
+  props: ['tableColumns'],
+  components: { SpatialFilterForm },
   data() {
     return {
       filterType: FILTER_TYPE.PROVINCE,
@@ -60,12 +50,87 @@ export default {
         { label: '南宁', value: 'nanning' },
         { label: '成都', value: 'chengdu' }
       ],
-      selectedCities: []
+      selectedCities: [],
+      selectedLontitude: null,
+      selectedLattitude: null,
+      filterMethod: 'include',
+      settings: {
+        province: null,
+        city: null,
+        customize: null
+      }
     }
   },
-  watch: {
-    filterType() {
-      console.log(this.filterType)
+  computed: {
+    lonColumns() {
+      let columns = []
+      this.tableColumns.forEach(val => {
+        let column = {
+          label: val,
+          value: val
+        }
+        var upperVal = val.toUpperCase()
+        if (
+          upperVal === 'X' ||
+          upperVal === 'LON' ||
+          upperVal === 'LONTITUDE' ||
+          upperVal === '经度'
+        ) {
+          columns.unshift(column)
+          this.selectedLontitude = val
+        } else {
+          columns.push(column)
+        }
+      })
+      return columns
+    },
+    latColumns() {
+      let columns = []
+      this.tableColumns.forEach(val => {
+        let column = {
+          label: val,
+          value: val
+        }
+        var upperVal = val.toUpperCase()
+        if (
+          upperVal === 'Y' ||
+          upperVal === 'LAT' ||
+          upperVal === 'LATTITUDE' ||
+          upperVal === '纬度'
+        ) {
+          columns.unshift(column)
+          this.selectedLattitude = val
+        } else {
+          columns.push(column)
+        }
+      })
+      return columns
+    }
+  },
+  created() {
+    this.allProvinces.length = 0
+    Provinces.features.forEach(feature => {
+      var properties = feature.properties
+      var province = {
+        label: properties.name,
+        value: properties.id,
+        feature: feature
+      }
+      this.allProvinces.push(province)
+    })
+    this.allProvinces.sort((province0, province1) => {
+      return +province0.value - +province1.value
+    })
+  },
+  methods: {
+    onFileChange() {},
+    handleProvinceSettingChange(settings) {
+      settings.provinces = this.allProvinces
+      this.settings[FILTER_TYPE.PROVINCE] = settings
+    },
+    handleCitySettingChange(settings) {
+      settings.cities = this.allCities
+      this.settings[FILTER_TYPE.CITY] = settings
     }
   }
 }
@@ -76,8 +141,8 @@ export default {
   margin: 32px 32px 0 32px;
   text-align: center;
 }
-.el-form-item {
-  width: 380px;
+.v-settings.hide {
+  display: none;
 }
 </style>
 

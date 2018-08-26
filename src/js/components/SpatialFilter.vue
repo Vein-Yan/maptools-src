@@ -7,7 +7,7 @@
     <div v-if="tableData.length>0" class="v-table">
       <div class="v-filter-btn-container">
         <el-button class="v-filter-btn" type="primary" icon="fa fa-filter" round @click="handleFilterBtnClick">空间过滤</el-button>
-        <el-tooltip v-if="scrollTop > 100" class="v-filter-btn-circle" content="空间过滤" placement="right">
+        <el-tooltip v-if="scrollTop > 80" class="v-filter-btn-circle" content="空间过滤" placement="right">
           <el-button type="primary" icon="fa fa-filter" circle @click="handleFilterBtnClick"></el-button>
         </el-tooltip>
       </div>
@@ -22,7 +22,7 @@
       </div>
     </div>
     <div v-if="tableData.length===0" class="v-upload">
-      <el-upload class="upload-demo" drag :multiple="false" accept="text/csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onChange>
+      <el-upload class="upload-demo" drag :multiple="false" accept="text/csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
@@ -31,21 +31,22 @@
       </el-upload>
     </div>
     <el-dialog title="空间过滤属性设置" :visible.sync="dialogVisible" width="50%" :before-close="handleDialogClose">
-      <spatial-filter-settings></spatial-filter-settings>
+      <spatial-filter-settings ref='spatialfilterSettings' :tableColumns="tableColumns"></spatial-filter-settings>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">开始过滤</el-button>
+        <el-button type="primary" @click="handleBeginFilterBtnClick">开始过滤</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import GeoJSON from 'ol/format/geojson'
 import Papa from 'papaparse'
 import SpatialFilterSettings from './spatialFilter/SpatialFilterSettings.vue'
 export default {
   props: ['mainScrollTop'],
-  components: {SpatialFilterSettings},
+  components: { SpatialFilterSettings },
   data() {
     return {
       dialogVisible: false,
@@ -74,7 +75,7 @@ export default {
     }
   },
   methods: {
-    onChange(file) {
+    onFileChange(file) {
       Papa.parse(file.raw, {
         complete: result => {
           let data = result.data
@@ -101,16 +102,66 @@ export default {
       this.currentPage = val
     },
     handleFilterBtnClick() {
-      console.log('filterBtnClick')
-      this.dialogVisible = true;
+      this.dialogVisible = true
     },
     handleDialogClose(done) {
-        this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done()
+        })
+        .catch(_ => {})
+    },
+    handleBeginFilterBtnClick() {
+      let spatialfilterSettings = this.$refs.spatialfilterSettings
+      let filterType = spatialfilterSettings.filterType
+      let settings = spatialfilterSettings.settings[filterType]
+      if (settings.selectedData.length < 1) {
+        this.$message.error(
+          '请选择' +
+            (filterType === 'province'
+              ? '省份数据'
+              : filterType === 'city' ? '城市数据' : '自定义区域数据')
+        )
+      } else {
+        this.dialogVisible = false
+        this.handleFilter(filterType, settings)
       }
+    },
+    handleFilter(filterType, settings) {
+      let areaData =
+        settings[
+          filterType === 'province'
+            ? 'provinces'
+            : filterType === 'city' ? 'cities' : 'customArea'
+        ]
+      let selectedData = settings.selectedData
+      let selectAreaData = areaData.filter(area => {
+        return selectedData.indexOf(area.value) > -1
+      })
+      let geometies = []
+      selectAreaData.forEach(area => {
+        let featureData = area.feature
+        let feature = new GeoJSON().readFeature(featureData)
+        geometies.push(feature.getGeometry())
+      })
+      console.log(geometies)
+      let filteredTableData = this.tableData.filter(row => {
+        let lon = row[settings.lonColumn]
+        let lat = row[settings.latColumn]
+        let isInclude = true,
+          isExclude = false
+        geometies.forEach(geom => {
+          isInclude = isInclude || geom.contianXY(lon, lat)
+          isExclude = isExclude && !geom.contianXY(lon, lat)
+        })
+        if (settings.filterMethod === 'include') {
+          return isInclude
+        } else {
+          return isExclude
+        }
+      })
+      console.log(filteredTableData)
+    }
   }
 }
 </script>
