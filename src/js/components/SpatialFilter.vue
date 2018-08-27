@@ -27,7 +27,7 @@
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
         </div>
-        <div class="el-upload__tip" slot="tip">只支持csv文件</div>
+        <div class="el-upload__tip" slot="tip">打开需要做空间过滤的文件，只支持csv文件</div>
       </el-upload>
     </div>
     <el-dialog title="空间过滤属性设置" :visible.sync="dialogVisible" width="50%" :before-close="handleDialogClose">
