@@ -72,15 +72,14 @@ export default {
         var upperVal = val.toUpperCase()
         if (
           upperVal === 'X' ||
+          upperVal === 'COORX' ||
           upperVal === 'LON' ||
           upperVal === 'LONTITUDE' ||
           upperVal === '经度'
         ) {
-          columns.unshift(column)
           this.selectedLontitude = val
-        } else {
-          columns.push(column)
         }
+        columns.push(column)
       })
       return columns
     },
@@ -94,15 +93,14 @@ export default {
         var upperVal = val.toUpperCase()
         if (
           upperVal === 'Y' ||
+          upperVal === 'COORY' ||
           upperVal === 'LAT' ||
           upperVal === 'LATTITUDE' ||
           upperVal === '纬度'
         ) {
-          columns.unshift(column)
           this.selectedLattitude = val
-        } else {
-          columns.push(column)
         }
+        columns.push(column)
       })
       return columns
     }
