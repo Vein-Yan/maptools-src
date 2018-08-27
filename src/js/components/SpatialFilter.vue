@@ -148,11 +148,12 @@ export default {
       let filteredTableData = this.tableData.filter(row => {
         let lon = row[settings.lonColumn]
         let lat = row[settings.latColumn]
-        let isInclude = true,
-          isExclude = false
+        let isInclude = false,
+          isExclude = true
         geometies.forEach(geom => {
-          isInclude = isInclude || geom.contianXY(lon, lat)
-          isExclude = isExclude && !geom.contianXY(lon, lat)
+          var isContain = geom.contianXY(lon, lat)
+          isInclude = isInclude || isContain
+          isExclude = isExclude && !isContain
         })
         if (settings.filterMethod === 'include') {
           return isInclude
