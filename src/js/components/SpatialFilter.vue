@@ -4,7 +4,7 @@
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>空间过滤</el-breadcrumb-item>
     </el-breadcrumb>
-    <div v-if="tableData.length>0" class="v-table">
+    <div v-if="!!tableData" class="v-table">
       <div class="v-filter-btn-container">
         <el-button class="v-filter-btn" type="primary" icon="fa fa-filter" round @click="handleFilterBtnClick">空间过滤</el-button>
         <el-tooltip v-if="scrollTop > 80" class="v-filter-btn-circle" content="空间过滤" placement="right">
@@ -21,7 +21,7 @@
         </el-pagination>
       </div>
     </div>
-    <div v-if="tableData.length===0" class="v-upload">
+    <div v-if="!tableData" class="v-upload">
       <el-upload class="upload-demo" drag :multiple="false" accept="text/csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或
@@ -53,7 +53,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       tableColumns: null,
-      tableData: []
+      tableData: null
     }
   },
   computed: {
@@ -77,9 +77,10 @@ export default {
   methods: {
     onFileChange(file) {
       Papa.parse(file.raw, {
+        encoding: 'GBK',
         complete: result => {
           let data = result.data
-          this.tableData.length = 0
+          this.tableData = []
           this.tableColumns = data[0]
           data.forEach((element, i) => {
             if (i === 0) {
@@ -144,14 +145,15 @@ export default {
         let feature = new GeoJSON().readFeature(featureData)
         geometies.push(feature.getGeometry())
       })
-      console.log(geometies)
       let filteredTableData = this.tableData.filter(row => {
         let lon = row[settings.lonColumn]
         let lat = row[settings.latColumn]
         let isInclude = false,
           isExclude = true
         geometies.forEach(geom => {
-          var isContain = geom.contianXY(lon, lat)
+          var isContain = geom.contianXY
+            ? geom.contianXY(lon, lat)
+            : geom.containsXY(lon, lat)
           isInclude = isInclude || isContain
           isExclude = isExclude && !isContain
         })
@@ -161,7 +163,7 @@ export default {
           return isExclude
         }
       })
-      console.log(filteredTableData)
+      this.tableData = filteredTableData
     }
   }
 }

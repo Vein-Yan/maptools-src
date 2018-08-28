@@ -25,7 +25,8 @@
 
 <script>
 import SpatialFilterForm from './SpatialFilterForm.vue'
-import Provinces from '@data/geojson/china.json'
+import Provinces from '@data/geojson/provinces.json'
+import Cities from '@data/geojson/cities.json'
 const FILTER_TYPE = {
   PROVINCE: 'province',
   CITY: 'city',
@@ -58,7 +59,8 @@ export default {
         province: null,
         city: null,
         customize: null
-      }
+      },
+      customizeFeatures: []
     }
   },
   computed: {
@@ -110,18 +112,54 @@ export default {
     Provinces.features.forEach(feature => {
       var properties = feature.properties
       var province = {
-        label: properties.name,
-        value: properties.id,
+        label: properties.NAME,
+        value: +properties.PAC,
         feature: feature
       }
       this.allProvinces.push(province)
     })
     this.allProvinces.sort((province0, province1) => {
-      return +province0.value - +province1.value
+      return province0.value - province1.value
+    })
+    this.allCities.length = 0
+    Cities.features.forEach(feature => {
+      var properties = feature.properties
+      var city = {
+        label: properties.NAME,
+        value: +properties.ID,
+        feature: feature
+      }
+      this.allCities.push(city)
+    })
+    this.allCities.sort((city0, city1) => {
+      return city0.value - city1.value
     })
   },
   methods: {
-    onFileChange() {},
+    onFileChange(file) {
+      this.customizeFeatures.length = 0
+      let fileReader = new FileReader()
+      fileReader.readAsBinaryString(file.raw)
+      fileReader.onload = evt => {
+        let data = evt.target.result
+        try {
+          data = JSON.parse(data)
+        } catch (e) {
+          this.$message.error('请上传正确的geojson文件')
+          return
+        }
+        if (!(data.type && data.features)) {
+          this.$message.error('请上传正确的geojson文件')
+          return
+        }
+        data.features.forEach(feature => {
+          var fea = {
+            feature: feature
+          }
+          this.customizeFeatures.push(fea)
+        })
+      }
+    },
     handleProvinceSettingChange(settings) {
       settings.provinces = this.allProvinces
       this.settings[FILTER_TYPE.PROVINCE] = settings

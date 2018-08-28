@@ -24,10 +24,13 @@ export default {
 }
 </script>
 <style>
+body{
+  margin: 4px;
+}
 .el-header,
 .el-footer {
-  background-color: #b3c0d1;
-  color: #333;
+  background-color: #333300;
+  color: #FFFFFF;
   text-align: center;
   line-height: 45px;
 }
@@ -41,5 +44,8 @@ export default {
   color: #333;
   text-align: center;
   height: calc(100vh - 61px);
+}
+a{
+  color: #161600
 }
 </style>
