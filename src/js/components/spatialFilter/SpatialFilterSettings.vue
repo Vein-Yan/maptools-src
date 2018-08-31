@@ -25,8 +25,8 @@
 
 <script>
 import SpatialFilterForm from './SpatialFilterForm.vue'
-import Provinces from '@data/geojson/provinces.json'
-import Cities from '@data/geojson/cities.json'
+import Provinces from '@data/geojson/china.json'
+import Cities from '@data/geojson/capitals.json'
 const FILTER_TYPE = {
   PROVINCE: 'province',
   CITY: 'city',
@@ -112,8 +112,8 @@ export default {
     Provinces.features.forEach(feature => {
       var properties = feature.properties
       var province = {
-        label: properties.NAME,
-        value: +properties.PAC,
+        label: properties.name,
+        value: +properties.id,
         feature: feature
       }
       this.allProvinces.push(province)
@@ -125,8 +125,8 @@ export default {
     Cities.features.forEach(feature => {
       var properties = feature.properties
       var city = {
-        label: properties.NAME,
-        value: +properties.ID,
+        label: properties.name,
+        value: +properties.id,
         feature: feature
       }
       this.allCities.push(city)
