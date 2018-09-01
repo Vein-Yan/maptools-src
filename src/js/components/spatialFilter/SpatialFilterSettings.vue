@@ -12,7 +12,8 @@
       <spatial-filter-form :lonColumns="lonColumns" :selectedLon="selectedLontitude" :latColumns="latColumns" :selectedLat="selectedLattitude" :allData="allCities" type="城市" @onSettingChange=handleCitySettingChange></spatial-filter-form>
     </section>
     <section class="v-settings" :class="{hide: filterType !== 'customize'}">
-      <el-upload class="upload-demo" drag :multiple="false" accept="application/json" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
+      <spatial-filter-form v-if='hasFeature' :lonColumns="lonColumns" :selectedLon="selectedLontitude" :latColumns="latColumns" :selectedLat="selectedLattitude" type="区域" @onSettingChange=handleCustomSettingChange></spatial-filter-form>
+      <el-upload v-else class="upload-demo" :auto-upload="false" drag :multiple="false" accept="application/json" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
@@ -24,7 +25,7 @@
 </template>
 
 <script>
-import SpatialFilterForm from './SpatialFilterForm.vue'
+import SpatialFilterForm from '../form/SpatialFilterForm.vue'
 import Provinces from '@data/geojson/china.json'
 import Cities from '@data/geojson/capitals.json'
 const FILTER_TYPE = {
@@ -105,6 +106,9 @@ export default {
         columns.push(column)
       })
       return columns
+    },
+    hasFeature(){
+      return this.customizeFeatures.length > 0
     }
   },
   created() {
@@ -167,6 +171,10 @@ export default {
     handleCitySettingChange(settings) {
       settings.cities = this.allCities
       this.settings[FILTER_TYPE.CITY] = settings
+    },
+    handleCustomSettingChange(settings){
+      settings.customAreas = this.customizeFeatures
+      this.settings[FILTER_TYPE.CUSTOMIZE] = settings
     }
   }
 }

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+import '@theme/index.css'
 import App from './App.vue'
 import Home from './components/Home.vue'
 import SpatialFilter from './components/SpatialFilter.vue'

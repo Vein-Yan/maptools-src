@@ -12,7 +12,7 @@
         </el-option>
       </el-select>
     </el-form-item>
-    <el-form-item :label="dataLabel" label-width='120px'>
+    <el-form-item :label="dataLabel" label-width='120px' v-if="!!allData">
       <el-select v-model="selectedAreaData" filterable multiple placeholder="请选择" @change=onSelectAreaDataChange>
         <el-option v-for="item in allData" :key="item.value" :label="item.label" :value="item.value">
         </el-option>

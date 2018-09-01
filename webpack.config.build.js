@@ -47,6 +47,7 @@ module.exports = {
     // 默认路径代理
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@theme': path.resolve(__dirname, 'theme'),
       '@data': path.resolve(__dirname, 'data')
     }
   }
