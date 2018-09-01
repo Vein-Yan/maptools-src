@@ -19,7 +19,7 @@
           <el-button type="primary" icon="fa fa-download" :disabled="tableData.length > 50000" round @click="handleOutputBtnClick"></el-button>
         </el-tooltip>
         <el-tooltip class="v-btn v-origin-btn" content="原数据" placement="top">
-          <el-button type="primary" icon="fa fa-rotate-left" round @click="handleOriginBtnClick"></el-button>
+          <el-button type="primary" icon="fa fa-rotate-left" :disabled="tableData === originTableData" round @click="handleOriginBtnClick"></el-button>
         </el-tooltip>
         <el-tooltip class="v-btn v-clear-btn" content="清空" placement="top">
           <el-button type="primary" icon="fa fa-trash" round @click="handleClearBtnClick"></el-button>
