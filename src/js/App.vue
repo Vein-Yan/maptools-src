@@ -29,7 +29,7 @@ body{
 }
 .el-header,
 .el-footer {
-  background-color: #333300;
+  background-color: #191900;
   color: #FFFFFF;
   text-align: center;
   line-height: 45px;

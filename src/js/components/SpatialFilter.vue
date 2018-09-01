@@ -6,13 +6,28 @@
     </el-breadcrumb>
     <div v-if="tableDataNotNull" class="v-table">
       <div class="v-tool-btn-container" v-if="hasData">
-        <el-button class="v-btn v-filter-btn" type="primary" icon="fa fa-filter" round @click="handleFilterBtnClick">空间过滤</el-button>
+        <el-tooltip class="v-btn v-filter-btn" content="空间过滤" placement="top">
+          <el-button type="primary" icon="fa fa-filter" round @click="handleFilterBtnClick"></el-button>
+        </el-tooltip>
         <el-tooltip v-if="scrollTop > 80" class="v-filter-btn-circle" content="空间过滤" placement="right">
           <el-button type="primary" icon="fa fa-filter" circle @click="handleFilterBtnClick"></el-button>
         </el-tooltip>
-        <el-button class="v-btn v-output-btn" type="primary" icon="fa fa-map" :disabled="tableData.length > 50000" round @click="hanldeMapBtnClick">地图显示</el-button>
-        <el-button class="v-btn v-output-btn" type="primary" icon="fa fa-download" :disabled="tableData.length > 50000" round @click="hanldeOutputBtnClick">导出CSV</el-button>
-        <el-button class="v-btn v-clear-btn" type="primary" icon="fa fa-trash" round @click="handleClearBtnClick">清空</el-button>
+        <el-tooltip class="v-btn v-map-btn" content="地图显示" placement="top">
+          <el-button type="primary" icon="fa fa-map" :disabled="tableData.length > 50000" round @click="handleMapBtnClick"></el-button>
+        </el-tooltip>
+        <el-tooltip class="v-btn v-output-btn" content="导出CSV" placement="top">
+          <el-button type="primary" icon="fa fa-download" :disabled="tableData.length > 50000" round @click="handleOutputBtnClick"></el-button>
+        </el-tooltip>
+        <el-tooltip class="v-btn v-origin-btn" content="原数据" placement="top">
+          <el-button type="primary" icon="fa fa-rotate-left" round @click="handleOriginBtnClick"></el-button>
+        </el-tooltip>
+        <el-tooltip class="v-btn v-clear-btn" content="清空" placement="top">
+          <el-button type="primary" icon="fa fa-trash" round @click="handleClearBtnClick"></el-button>
+        </el-tooltip>
+        <el-select class="v-file-encode-select" v-model="fileEncode" placeholder="请选择">
+          <el-option label="GBK" value="GBK"></el-option>
+          <el-option label="UTF8" value="UTF8"></el-option>
+        </el-select>
       </div>
       <el-table :data="currentPageData" stripe border style="width: 100%">
         <div v-for="(column,idx) in tableColumns" :key="idx">
@@ -25,7 +40,7 @@
       </div>
     </div>
     <div v-if="!tableDataNotNull" class="v-upload">
-      <el-upload class="upload-demo" :auto-upload="false" drag :multiple="false" accept="text/csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
+      <el-upload class="upload-demo" :auto-upload="false" drag :multiple="false" accept=".csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
@@ -33,7 +48,7 @@
         <div class="el-upload__tip" slot="tip">打开需要做空间过滤的文件，只支持csv文件</div>
       </el-upload>
     </div>
-    <el-dialog title="空间过滤属性设置" :visible.sync="settingDialogVisible" width="50%" :before-close="handleSettingDialogClose">
+    <el-dialog title="空间过滤属性设置" :visible.sync="settingDialogVisible" width="50%">
       <spatial-filter-settings ref='spatialfilterSettings' :tableColumns="tableColumns"></spatial-filter-settings>
       <span slot="footer" class="dialog-footer">
         <el-button @click="settingDialogVisible = false">取 消</el-button>
@@ -71,11 +86,19 @@ export default {
       pageSize: 10,
       tableColumns: null,
       tableData: null,
+      originTableData: null,
       fileName: null,
       fullscreenLoading: false,
       Xcolumn: null,
       Ycolumn: null,
-      loadMapCount: 0
+      loadMapCount: 0,
+      fileEncode: 'GBK',
+      rawFile: null
+    }
+  },
+  watch: {
+    fileEncode(){
+      this.readFile()
     }
   },
   computed: {
@@ -108,8 +131,12 @@ export default {
   methods: {
     onFileChange(file) {
       this.fileName = file.name
-      Papa.parse(file.raw, {
-        encoding: 'GBK',
+      this.rawFile = file.raw
+      this.readFile()
+    },
+    readFile(){
+      Papa.parse(this.rawFile, {
+        encoding: this.fileEncode,
         complete: result => {
           let data = result.data
           this.tableData = []
@@ -124,11 +151,12 @@ export default {
               row[ele] = rowData[idx]
             })
             this.tableData.push(row)
+            this.originTableData = this.tableData
           })
         }
       })
     },
-    hanldeOutputBtnClick() {
+    handleOutputBtnClick() {
       let tableData = []
       this.tableData.forEach(row => {
         let newRow = []
@@ -165,13 +193,6 @@ export default {
         })
       }
       this.settingDialogVisible = true
-    },
-    handleSettingDialogClose(done) {
-      this.$confirm('确认关闭？')
-        .then(_ => {
-          done()
-        })
-        .catch(_ => {})
     },
     handleBeginFilterBtnClick() {
       this.fullscreenLoading = true
@@ -231,6 +252,7 @@ export default {
         }
       })
       this.tableData = filteredTableData
+      this.loadMapCount++
     },
     handleSelectLonLatBtnClick() {
       this.Xcolumn = this.$refs.lonLatForm.selectedLon
@@ -239,17 +261,28 @@ export default {
       this.lonlatDialogVisible = false
       this.mapDialogVisible = true
     },
-    hanldeMapBtnClick() {
+    handleMapBtnClick() {
       if (!this.Xcolumn || !this.Ycolumn) {
         this.lonlatDialogVisible = true
       } else {
         this.mapDialogVisible = true
       }
     },
+    handleOriginBtnClick() {
+      if (this.tableData === this.originTableData) {
+        return
+      }
+      this.tableData = this.originTableData
+      this.loadMapCount++
+    },
     handleClearBtnClick() {
-      this.Xcolumn = null
-      this.Ycolumn = null
-      this.tableData = null
+      this.$confirm('确认清空数据？')
+        .then(_ => {
+          this.Xcolumn = null
+          this.Ycolumn = null
+          this.tableData = null
+        })
+        .catch(_ => {})
     }
   }
 }
@@ -275,14 +308,16 @@ export default {
   position: relative;
   top: -16px;
 }
-.v-btn .fa {
-  margin-right: 3px;
-}
 .v-filter-btn-circle {
   position: absolute;
   top: 87px;
   right: 123px;
   z-index: 99;
+}
+.v-file-encode-select{
+  width: 84px;
+  top: -16px;
+  margin-left: 12px;
 }
 </style>
 

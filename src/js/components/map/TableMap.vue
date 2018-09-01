@@ -34,14 +34,14 @@ export default {
     initMap() {
       let circleStyle = new Style({
         image: new Circle({
-          radius: 10,
+          radius: 8,
           snapToPixel: false,
           fill: new Fill({
-            color: '#333300'
+            color: '#DE8100'
           }),
           stroke: new Stroke({
-            color: 'white',
-            width: 1
+            color: '#333300',
+            width: 2
           })
         })
       })
