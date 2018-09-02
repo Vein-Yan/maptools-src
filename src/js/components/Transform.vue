@@ -1,6 +1,10 @@
 <template>
-  <el-breadcrumb separator="/">
-  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-  <el-breadcrumb-item>坐标转换</el-breadcrumb-item>
-</el-breadcrumb>
+  <file-upload-tool-base toolName="坐标转换"></file-upload-tool-base>
 </template>
+
+<script>
+import FileUploadToolBase from '@component/page/FileUploadToolBase.vue'
+export default {
+  components: {FileUploadToolBase}
+}
+</script>
