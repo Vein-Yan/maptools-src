@@ -14,7 +14,7 @@
         <div class="el-upload__text">将文件拖到此处，或
           <em>点击上传</em>
         </div>
-        <div class="el-upload__tip" slot="tip">打开需要做空间过滤的文件，只支持csv文件</div>
+        <div class="el-upload__tip" slot="tip">{{fileUploadTip}}</div>
       </el-upload>
     </div>
   </div>
@@ -24,7 +24,7 @@
 import PaginationTable from '@component/page/PaginationTable.vue'
 import Util from '@/js/util.js'
 export default {
-  props: ['mainScrollTop', 'toolName'],
+  props: ['mainScrollTop', 'toolName', 'fileUploadTip'],
   components: { PaginationTable },
   data() {
     return {
