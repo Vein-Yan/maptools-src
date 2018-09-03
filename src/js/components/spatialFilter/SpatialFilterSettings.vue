@@ -28,6 +28,7 @@
 import SpatialFilterForm from '../form/SpatialFilterForm.vue'
 import Provinces from '@data/geojson/china.json'
 import Cities from '@data/geojson/capitals.json'
+import Util from '@/js/util.js'
 const FILTER_TYPE = {
   PROVINCE: 'province',
   CITY: 'city',
@@ -72,14 +73,7 @@ export default {
           label: val,
           value: val
         }
-        var upperVal = val.toUpperCase()
-        if (
-          upperVal === 'X' ||
-          upperVal === 'COORX' ||
-          upperVal === 'LON' ||
-          upperVal === 'LONTITUDE' ||
-          upperVal === '经度'
-        ) {
+        if (Util.isLongitude(val)) {
           this.selectedLontitude = val
         }
         columns.push(column)
@@ -93,21 +87,14 @@ export default {
           label: val,
           value: val
         }
-        var upperVal = val.toUpperCase()
-        if (
-          upperVal === 'Y' ||
-          upperVal === 'COORY' ||
-          upperVal === 'LAT' ||
-          upperVal === 'LATTITUDE' ||
-          upperVal === '纬度'
-        ) {
+        if (Util.isLatitude(val)) {
           this.selectedLattitude = val
         }
         columns.push(column)
       })
       return columns
     },
-    hasFeature(){
+    hasFeature() {
       return this.customizeFeatures.length > 0
     }
   },
@@ -172,7 +159,7 @@ export default {
       settings.cities = this.allCities
       this.settings[FILTER_TYPE.CITY] = settings
     },
-    handleCustomSettingChange(settings){
+    handleCustomSettingChange(settings) {
       settings.customAreas = this.customizeFeatures
       this.settings[FILTER_TYPE.CUSTOMIZE] = settings
     }

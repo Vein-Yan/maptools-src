@@ -22,7 +22,7 @@ function readCSV(rawFile, fileEncode) {
           tableData.push(row)
         })
         resolve({
-          tableColumns, 
+          tableColumns,
           tableData
         })
       },
@@ -57,7 +57,40 @@ function outputCSV(tableColumns, tableData, fileName) {
   document.body.removeChild(link) // Required for FF
 }
 
+function isLongitude(val) {
+  val = val || ''
+  var upperVal = val.toUpperCase()
+  if (
+    upperVal === 'X' ||
+    upperVal === 'COORX' ||
+    upperVal === 'LON' ||
+    upperVal === 'LNG' ||
+    upperVal === 'LONGITUDE' ||
+    upperVal === '经度'
+  ) {
+    return true
+  }
+  return false
+}
+
+function isLatitude(val) {
+  val = val || ''
+  var upperVal = val.toUpperCase()
+  if (
+    upperVal === 'Y' ||
+    upperVal === 'COORY' ||
+    upperVal === 'LAT' ||
+    upperVal === 'LATITUDE' ||
+    upperVal === '纬度'
+  ) {
+    return true
+  }
+  return false
+}
+
 export default {
   readCSV,
-  outputCSV
+  outputCSV,
+  isLongitude,
+  isLatitude
 }

@@ -97,6 +97,7 @@ export default {
         this.vectorSource.addFeature(feature)
       }
       let extent = this.vectorSource.getExtent()
+      console.log(extent)
       this.view.fit(extent)
     }
   },

@@ -16,14 +16,13 @@
 </template>
 
 <script>
+import Util from '@/js/util.js'
 export default {
-  props: [
-    'tableColumns'
-  ],
+  props: ['tableColumns'],
   data() {
     return {
-    'selectedLon': null,
-    'selectedLat': null
+      selectedLon: null,
+      selectedLat: null
     }
   },
   computed: {
@@ -34,14 +33,7 @@ export default {
           label: val,
           value: val
         }
-        var upperVal = val.toUpperCase()
-        if (
-          upperVal === 'X' ||
-          upperVal === 'COORX' ||
-          upperVal === 'LON' ||
-          upperVal === 'LONTITUDE' ||
-          upperVal === '经度'
-        ) {
+        if (Util.isLongitude(val)) {
           this.selectedLon = val
         }
         columns.push(column)
@@ -55,14 +47,7 @@ export default {
           label: val,
           value: val
         }
-        var upperVal = val.toUpperCase()
-        if (
-          upperVal === 'Y' ||
-          upperVal === 'COORY' ||
-          upperVal === 'LAT' ||
-          upperVal === 'LATTITUDE' ||
-          upperVal === '纬度'
-        ) {
+        if (Util.isLatitude(val)) {
           this.selectedLat = val
         }
         columns.push(column)
