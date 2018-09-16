@@ -1,11 +1,7 @@
 <template>
   <div class="v-spatial-container">
-    <el-breadcrumb separator="/">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>空间过滤</el-breadcrumb-item>
-    </el-breadcrumb>
-    <div v-if="tableDataNotNull" class="v-table">
-      <div class="v-tool-btn-container" v-if="hasData">
+    <file-upload-tool-base :fileEncode="fileEncode" :tableColumns="tableColumns" :tableData="tableData" toolName="空间过滤" fileUploadTip="打开需要做空间过滤的文件，只支持csv文件" @onFileReaded="onFileReaded">
+      <div class="v-tool-btn-container">
         <el-tooltip class="v-btn v-filter-btn" content="空间过滤" placement="top">
           <el-button type="primary" icon="fa fa-filter" round @click="handleFilterBtnClick"></el-button>
         </el-tooltip>
@@ -13,10 +9,10 @@
           <el-button type="primary" icon="fa fa-filter" circle @click="handleFilterBtnClick"></el-button>
         </el-tooltip>
         <el-tooltip class="v-btn v-map-btn" content="地图显示" placement="top">
-          <el-button type="primary" icon="fa fa-map" :disabled="tableData.length > 50000" round @click="handleMapBtnClick"></el-button>
+          <el-button type="primary" icon="fa fa-map" :disabled="tableData && tableData.length > 50000" round @click="handleMapBtnClick"></el-button>
         </el-tooltip>
         <el-tooltip class="v-btn v-output-btn" content="导出CSV" placement="top">
-          <el-button type="primary" icon="fa fa-download" :disabled="tableData.length > 50000" round @click="handleOutputBtnClick"></el-button>
+          <el-button type="primary" icon="fa fa-download" :disabled="tableData && tableData.length > 50000" round @click="handleOutputBtnClick"></el-button>
         </el-tooltip>
         <el-tooltip class="v-btn v-origin-btn" content="原数据" placement="top">
           <el-button type="primary" icon="fa fa-rotate-left" :disabled="tableData === originTableData" round @click="handleOriginBtnClick"></el-button>
@@ -29,25 +25,7 @@
           <el-option label="UTF8" value="UTF8"></el-option>
         </el-select>
       </div>
-      <el-table :data="currentPageData" stripe border style="width: 100%">
-        <div v-for="(column,idx) in tableColumns" :key="idx">
-          <el-table-column :prop="column" :label="column" align="left"></el-table-column>
-        </div>
-      </el-table>
-      <div class="v-block">
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 50, 100, 150]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="tableData.length">
-        </el-pagination>
-      </div>
-    </div>
-    <div v-if="!tableDataNotNull" class="v-upload">
-      <el-upload class="upload-demo" :auto-upload="false" drag :multiple="false" accept=".csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
-        <i class="el-icon-upload"></i>
-        <div class="el-upload__text">将文件拖到此处，或
-          <em>点击上传</em>
-        </div>
-        <div class="el-upload__tip" slot="tip">打开需要做空间过滤的文件，只支持csv文件</div>
-      </el-upload>
-    </div>
+    </file-upload-tool-base>
     <el-dialog title="空间过滤属性设置" :visible.sync="settingDialogVisible" width="50%">
       <spatial-filter-settings ref='spatialfilterSettings' :tableColumns="tableColumns"></spatial-filter-settings>
       <span slot="footer" class="dialog-footer">
@@ -63,127 +41,57 @@
       </span>
     </el-dialog>
     <el-dialog title="地图显示" :visible.sync="mapDialogVisible" width="90%">
-      <table-map ref="tableMap" mapId="tableMap" :tableData="tableData" :Xcolumn="Xcolumn" :Ycolumn="Ycolumn" :loadCount="loadMapCount"></table-map>
+      <table-map ref="tableMap" mapId="tableMap" :tableData="tableData" :Xcolumn="Xcolumn" :Ycolumn="Ycolumn" :labelColumn="labelColumn" :loadCount="loadMapCount"></table-map>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import GeoJSON from 'ol/format/geojson'
-import Papa from 'papaparse'
-import SpatialFilterSettings from './spatialFilter/SpatialFilterSettings.vue'
-import LonLatForm from './form/LonLatForm.vue'
-import TableMap from './map/TableMap.vue'
+import Util from '@/js/util.js'
+import SpatialFilterSettings from '@component/spatialFilter/SpatialFilterSettings.vue'
+import FileUploadToolBase from '@component/page/FileUploadToolBase.vue'
+import LonLatForm from '@component/form/LonLatForm.vue'
+import TableMap from '@component/map/TableMap.vue'
 export default {
   props: ['mainScrollTop'],
-  components: { SpatialFilterSettings, LonLatForm, TableMap },
+  components: {
+    FileUploadToolBase,
+    SpatialFilterSettings,
+    LonLatForm,
+    TableMap
+  },
   data() {
     return {
       lonlatDialogVisible: false,
       settingDialogVisible: false,
       mapDialogVisible: false,
-      currentPage: 1,
-      pageSize: 10,
       tableColumns: null,
       tableData: null,
       originTableData: null,
-      fileName: null,
       fullscreenLoading: false,
       Xcolumn: null,
       Ycolumn: null,
+      labelColumn: null,
       loadMapCount: 0,
-      fileEncode: 'GBK',
-      rawFile: null
-    }
-  },
-  watch: {
-    fileEncode(){
-      this.readFile()
+      fileEncode: 'GBK'
     }
   },
   computed: {
-    currentPageData() {
-      let pageSize = this.pageSize,
-        currentPage = this.currentPage
-      let currentPageData = []
-      var maxIndex = this.tableData.length - 1
-      let start = (currentPage - 1) * pageSize,
-        end = currentPage * pageSize - 1
-      end = end > maxIndex ? maxIndex : end
-      for (let i = start; i <= end; i++) {
-        currentPageData.push(this.tableData[i])
-      }
-      return currentPageData
-    },
     scrollTop() {
       return this.mainScrollTop
-    },
-    tableDataNotNull() {
-      return this.tableData === null ? false : true
-    },
-    hasData() {
-      if (!this.tableData || this.tableData.length < 1) {
-        return false
-      }
-      return true
     }
   },
   methods: {
-    onFileChange(file) {
-      this.fileName = file.name
-      this.rawFile = file.raw
-      this.readFile()
-    },
-    readFile(){
-      Papa.parse(this.rawFile, {
-        encoding: this.fileEncode,
-        complete: result => {
-          let data = result.data
-          this.tableData = []
-          this.tableColumns = data[0]
-          data.forEach((element, i) => {
-            if (i === 0) {
-              return
-            }
-            let rowData = data[i],
-              row = {}
-            this.tableColumns.forEach((ele, idx) => {
-              row[ele] = rowData[idx]
-            })
-            this.tableData.push(row)
-            this.originTableData = this.tableData
-          })
-        }
-      })
+    onFileReaded(tableColumns, tableData) {
+      this.originTableData = tableData
+      this.tableColumns = tableColumns
+      this.tableData = tableData
     },
     handleOutputBtnClick() {
-      let tableData = []
-      this.tableData.forEach(row => {
-        let newRow = []
-        this.tableColumns.forEach((column, idx) => {
-          newRow[idx] = row[column]
-        })
-        tableData.push(newRow)
-      })
-      let outPutJson = {
-        fields: this.tableColumns,
-        data: tableData
-      }
-      let output = Papa.unparse(outPutJson)
-      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + output
-      const link = document.createElement('a')
-      link.href = encodeURI(csvContent)
       let fileName = this.fileName.replace(/\.csv$/, '')
-      link.download = `${fileName + '_filter_' + new Date().getTime()}.csv`
-      document.body.appendChild(link) // Required for FF
-      link.click()
-      document.body.removeChild(link) // Required for FF
-    },
-    handleSizeChange(val) {
-      this.pageSize = val
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val
+      fileName = `${fileName + '_filter_' + new Date().getTime()}.csv`
+      Util.outputCSV(this.tableColumns, this.tableData, fileName)
     },
     handleFilterBtnClick() {
       if (!this.tableData || this.tableData.length < 1) {
@@ -257,12 +165,20 @@ export default {
     handleSelectLonLatBtnClick() {
       this.Xcolumn = this.$refs.lonLatForm.selectedLon
       this.Ycolumn = this.$refs.lonLatForm.selectedLat
+      this.labelColumn = this.$refs.lonLatForm.selectedLabel
+      if (!this.Xcolumn || !this.Ycolumn || !this.labelColumn) {
+        this.$message({
+          message: '还没选择完字段，不能继续',
+          type: 'warning'
+        })
+        return
+      }
       this.loadMapCount++
       this.lonlatDialogVisible = false
       this.mapDialogVisible = true
     },
     handleMapBtnClick() {
-      if (!this.Xcolumn || !this.Ycolumn) {
+      if (!this.Xcolumn || !this.Ycolumn || !this.labelColumn) {
         this.lonlatDialogVisible = true
       } else {
         this.mapDialogVisible = true
@@ -314,7 +230,7 @@ export default {
   right: 123px;
   z-index: 99;
 }
-.v-file-encode-select{
+.v-file-encode-select {
   width: 84px;
   top: -16px;
   margin-left: 12px;

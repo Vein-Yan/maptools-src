@@ -15,14 +15,23 @@ import Style from 'ol/style/style'
 import Circle from 'ol/style/circle'
 import Fill from 'ol/style/fill'
 import Stroke from 'ol/style/stroke'
+import Text from 'ol/style/text'
 import proj from 'ol/proj'
 
 import 'ol/ol.css'
 export default {
-  props: ['mapId', 'tableData', 'Xcolumn', 'Ycolumn', 'loadCount'],
+  props: [
+    'mapId',
+    'tableData',
+    'Xcolumn',
+    'Ycolumn',
+    'labelColumn',
+    'loadCount'
+  ],
   data() {
     return {
       vectorSource: null,
+      textSource: null,
       view: null
     }
   },
@@ -45,10 +54,35 @@ export default {
           })
         })
       })
+      let textStyle = new Style({
+        text: new Text({
+          font: '19px "Microsoft YaHei",arial,sans-serif',
+          placement: 'point',
+          offsetY: -17,
+          fill: new Fill({
+            color: '#333300'
+          }),
+          stroke: new Stroke({
+            color: '#DDDDDD',
+            width: 1
+          })
+        })
+      })
       this.vectorSource = new VectorSource()
       let vectorLayer = new VectorLayer({
         source: this.vectorSource,
         style: circleStyle
+      })
+
+      this.textSource = new VectorSource()
+      let textLayer = new VectorLayer({
+        declutter: true,
+        source: this.vectorSource,
+        style: feature => {
+          let props = feature.getProperties()
+          textStyle.getText().setText(props[this.labelColumn])
+          return textStyle
+        }
       })
 
       this.view = new View({
@@ -67,7 +101,8 @@ export default {
                 'http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7'
             })
           }),
-          vectorLayer
+          vectorLayer,
+          textLayer
         ],
         view: this.view
       })
@@ -94,7 +129,9 @@ export default {
         let feature = new Feature({
           geometry: geometry
         })
+        feature.setProperties(row)
         this.vectorSource.addFeature(feature)
+        this.textSource.addFeature(feature)
       }
       let extent = this.vectorSource.getExtent()
       console.log(extent)

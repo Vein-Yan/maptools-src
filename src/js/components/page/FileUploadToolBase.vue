@@ -24,16 +24,12 @@
 import PaginationTable from '@component/page/PaginationTable.vue'
 import Util from '@/js/util.js'
 export default {
-  props: ['mainScrollTop', 'toolName', 'fileUploadTip'],
+  props: ['mainScrollTop', 'toolName', 'fileUploadTip', 'tableColumns', 'tableData', 'fileEncode'],
   components: { PaginationTable },
   data() {
     return {
-      tableColumns: null,
-      tableData: null,
-      originTableData: null,
       fileName: null,
       fullscreenLoading: false,
-      fileEncode: 'GBK',
       rawFile: null
     }
   },
@@ -61,15 +57,8 @@ export default {
     },
     readFile() {
       Util.readCSV(this.rawFile, this.fileEncode).then(({tableColumns, tableData}) => {
-        this.tableColumns = tableColumns
-        this.originTableData = tableData
-        this.tableData = tableData
+        this.$emit('onFileReaded', tableColumns, tableData)
       })
-    },
-    handleOutputBtnClick() {
-      let fileName = this.fileName.replace(/\.csv$/, '')
-      fileName = `${fileName + '_filter_' + new Date().getTime()}.csv`
-      Util.outputCSV(this.tableColumns, this.tableData, fileName)
     }
   }
 }

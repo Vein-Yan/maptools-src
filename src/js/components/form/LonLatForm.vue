@@ -12,6 +12,12 @@
         </el-option>
       </el-select>
     </el-form-item>
+    <el-form-item label="选择文本字段" label-width='120px'>
+      <el-select v-model="selectedLabel" filterable placeholder="请选择">
+        <el-option v-for="item in latColumns" :key="item.value" :label="item.label" :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
   </el-form>
 </template>
 
@@ -22,19 +28,23 @@ export default {
   data() {
     return {
       selectedLon: null,
-      selectedLat: null
+      selectedLat: null,
+      selectedLabel: null
     }
   },
   computed: {
     lonColumns() {
       let columns = []
-      this.tableColumns.forEach(val => {
+      this.tableColumns.forEach((val, idx) => {
         let column = {
           label: val,
           value: val
         }
         if (Util.isLongitude(val)) {
           this.selectedLon = val
+        }
+        if (idx === 0) {
+          this.selectedLabel = val
         }
         columns.push(column)
       })

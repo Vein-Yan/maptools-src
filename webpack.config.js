@@ -1,9 +1,15 @@
 const webpack = require('webpack')
 const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
   plugins: [
+    new CleanWebpackPlugin(['dist']),
+    new HtmlWebpackPlugin({
+      title: 'Hot Module Replacement'
+    }),
     new webpack.HotModuleReplacementPlugin(), //热加载插件,
     new VueLoaderPlugin()
   ],
@@ -14,6 +20,10 @@ module.exports = {
     filename: '[name].bundle.js',
     publicPath: '/assets/',
     path: path.resolve(__dirname, 'build')
+  },
+  devServer: {
+    contentBase: './build',
+    hot: true
   },
   devtool: 'source-map',
   module: {

@@ -45,10 +45,6 @@ export default {
       filterMethod: 'include'
     }
   },
-  mounted() {
-    this.selectedLontitude = this.selectedLon
-    this.selectedLattitude = this.selectedLat
-  },
   computed: {
     dataLabel() {
       return '选择' + this.type
@@ -63,7 +59,17 @@ export default {
     },
     filterMethod() {
       this.updateSettings()
+    },
+    selectedLon(val){
+      this.selectedLontitude = val
+    },
+    selectedLat(val){
+      this.selectedLattitude = val
     }
+  },
+  created(){
+    this.selectedLontitude = this.selectedLon
+    this.selectedLattitude = this.selectedLat
   },
   methods: {
     updateSettings() {
