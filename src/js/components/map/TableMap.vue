@@ -32,7 +32,14 @@ export default {
     return {
       vectorSource: null,
       textSource: null,
+      map: null,
       view: null
+    }
+  },
+  watch:{
+    labelColumn(){
+      debugger
+      this.map && this.map.render()
     }
   },
   mounted() {
@@ -92,7 +99,7 @@ export default {
         maxZoom: 20
       })
 
-      new Map({
+      this.map = new Map({
         target: this.mapId,
         layers: [
           new TileLayer({

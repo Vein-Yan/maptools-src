@@ -28,6 +28,7 @@ export default {
   components: { PaginationTable },
   data() {
     return {
+      
       fileName: null,
       fullscreenLoading: false,
       rawFile: null
