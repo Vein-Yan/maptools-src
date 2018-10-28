@@ -283,6 +283,7 @@ export default {
           this.Xcolumn = null
           this.Ycolumn = null
           this.tableData = null
+          this.labelColumn = null
         })
         .catch(()=> {})
     }
