@@ -14,6 +14,7 @@
     "lodash": "^4.17.11",
     "ol": "^5.2.0",
     "papaparse": "^4.6.1",
+    "promise-polyfill": "^8.1.0",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1"
   },

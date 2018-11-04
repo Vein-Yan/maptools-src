@@ -1,12 +1,8 @@
 <template>
   <div class="v-upload-tool-container">
-    <el-breadcrumb separator="/">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>{{toolName}}</el-breadcrumb-item>
-    </el-breadcrumb>
+    <breadcrumb :toolName="toolName"></breadcrumb> 
     <div v-if="tableDataNotNull" class="v-table">
       <slot></slot>
-      <pagination-table :tableColumns="tableColumns" :tableData="tableData"></pagination-table>
     </div>
     <div v-if="!tableDataNotNull" class="v-upload">
       <el-upload class="upload-demo" :auto-upload="false" drag :multiple="false" accept=".csv" action="https://jsonplaceholder.typicode.com/posts/" :on-change=onFileChange>
@@ -21,14 +17,13 @@
 </template>
 
 <script>
-import PaginationTable from '@/components/page/PaginationTable.vue'
+import Breadcrumb from '@/components/page/Breadcrumb.vue'
 import Util from '@/util.js'
 export default {
-  props: ['mainScrollTop', 'toolName', 'fileUploadTip', 'tableColumns', 'tableData', 'fileEncode'],
-  components: { PaginationTable },
+  props: ['mainScrollTop', 'toolName', 'fileUploadTip', 'tableData', 'fileEncode'],
+  components: { Breadcrumb},
   data() {
     return {
-      
       fileName: null,
       fullscreenLoading: false,
       rawFile: null

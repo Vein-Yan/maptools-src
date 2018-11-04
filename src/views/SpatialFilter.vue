@@ -1,7 +1,6 @@
 <template>
   <div class="v-spatial-container">
     <file-upload-tool-base :fileEncode="fileEncode"
-      :tableColumns="tableColumns"
       :tableData="tableData"
       toolName="空间过滤"
       fileUploadTip="打开需要做空间过滤的文件，只支持csv文件"
@@ -68,6 +67,8 @@
             value="UTF8"></el-option>
         </el-select>
       </div>
+      <pagination-table :tableColumns="tableColumns"
+        :tableData="tableData"></pagination-table>
     </file-upload-tool-base>
     <el-dialog title="空间过滤属性设置"
       :visible.sync="settingDialogVisible"
@@ -125,12 +126,14 @@ import GeoJSON from 'ol/format/GeoJSON.js'
 import Util from '@/util.js'
 import SpatialFilterSettings from '@/components/spatialFilter/SpatialFilterSettings.vue'
 import FileUploadToolBase from '@/components/page/FileUploadToolBase.vue'
+import PaginationTable from '@/components/table/PaginationTable.vue'
 import LonLatForm from '@/components/form/LonLatForm.vue'
 import TableMap from '@/components/map/TableMap.vue'
 export default {
   props: ['mainScrollTop'],
   components: {
     FileUploadToolBase,
+    PaginationTable,
     SpatialFilterSettings,
     LonLatForm,
     TableMap
@@ -210,7 +213,9 @@ export default {
         settings[
           filterType === 'province'
             ? 'provinces'
-            : filterType === 'city' ? 'cities' : 'customAreas'
+            : filterType === 'city'
+              ? 'cities'
+              : 'customAreas'
         ]
       let selectAreaData
       if (filterType === 'customize') {
@@ -279,13 +284,13 @@ export default {
     },
     handleClearBtnClick() {
       this.$confirm('确认清空数据？')
-        .then(()=> {
+        .then(() => {
           this.Xcolumn = null
           this.Ycolumn = null
           this.tableData = null
           this.labelColumn = null
         })
-        .catch(()=> {})
+        .catch(() => {})
     }
   }
 }
